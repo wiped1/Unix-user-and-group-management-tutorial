@@ -442,7 +442,7 @@ Pewnie teraz myślisz, że wiesz już wszystko. Niestety jesteś w ogromnym bł�
 
 ###Be social!
 
-Treść tego tekstu jest dostępna na [Githubie](). Jeżeli zauważyłeś jakiś błąd lub chcesz coś dodać, nie wahaj się wnieść własnego wkładu w ten tekst. Przyszli czytelnicy będą Ci wdzięczni :)
+Treść tego tekstu jest dostępna na [Githubie](https://github.com/mckomo/Unix-user-and-group-management-tutorial). Jeżeli zauważyłeś jakiś błąd lub chcesz coś dodać, nie wahaj się wnieść własnego wkładu w ten tekst. Przyszli czytelnicy będą Ci wdzięczni :)
 
 ---
 Autor tekstu: Maciej Komorowski
