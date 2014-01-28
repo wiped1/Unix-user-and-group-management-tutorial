@@ -6,8 +6,8 @@ To repozytorium zawiera kod źródłowy strony internetowej o tematycę zarządz
 
 Przede wszystkim musisz mieć zainstlowany [node.js](http://nodejs.org/) oraz niezbędne biblioteki `node.js`: 
 
-*[grunt-cli](https://github.com/gruntjs/grunt-cli)
-*[less](http://www.lesscss.org/)
+* [grunt-cli](https://github.com/gruntjs/grunt-cli)
+* [less](http://www.lesscss.org/)
 
 Jeżeli twoje środowisko jest już przygotowane, zainstaluj zależności projektu:
 
