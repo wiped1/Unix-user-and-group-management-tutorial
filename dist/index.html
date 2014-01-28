@@ -1,0 +1,325 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Zarządzanie użytkownikami oraz grupami w systemach Unix</title>
+<link href="css/script.min.css" rel="stylesheet"/>
+<link href="css/highlight/atelier-heath.light.css" rel="stylesheet">
+</head>
+<body>
+<h1 id="zarz-dzanie-u-ytkownikami-oraz-grupami-w-systemach-unix">Zarządzanie użytkownikami oraz grupami w systemach Unix</h1>
+<h3 id="spis-tre-ci">Spis treści</h3>
+<ol>
+<li><a href="#introduction">Wstęp</a></li>
+<li><a href="#requirements">Zanim zaczniesz</a></li>
+<li><a href="#permission-control">Kontrola dostępu</a></li>
+<li><a href="#users">Zarządzanie użytkownikami</a></li>
+<li><a href="#groups">Zarządzanie grupami</a></li>
+<li><a href="#summary">Podsumowanie</a></li>
+</ol>
+<h2 id="introduction">Wstęp</h2>
+
+<p>Celem lektury tego poradnika jest przysposobienie umiejętności niezbędnej dla każdego użytkownika systemu operacyjnego typu Unix. Poprzez lekturę oraz wykonanie zestawu praktycznych ćwiczeń, chciałbym Cię, drogi czytelniku, zapoznać z  podstawami administracji użytkownikami oraz grupami w systemach Unix. </p>
+<p>Zanim jednak rozpoczniesz pracę z tym dokumentem, zapoznaj się z rozdziałem <a href="#requirements">Zanim zaczniesz</a>, w którym dowiesz się, co zrobić przed rozpoczęciem ćwiczeń oraz rozdziałem <a href="#permission-control">Kontrola dostępu</a>, który odświeży twoje wiadomości z zakresu kontroli dostępu do zasobów systemu. Tekst zawieram wiele odnośników do sprawdzonych internetowych źródeł – nie wahaj się ich użyć, mogą one znacznie poszerzyć zakres twojej wiedzy. Nie zapomnij również zaglądnąć do działu <a href="#links">Dla głodnych wiedzy</a>,  gdzie umieściłem link do stron, które warto odwiedzić. Tymczasem zapraszam do lektury!</p>
+<h2 id="requirements">Zanim zaczniesz</h2>
+
+<p>Zanim zaczniemy, musimy przygotować nasze stanowisko pracy. Pierwszym krokiem będzie instalacja systemu operacyjnego. Wszystkie praktycznie ćwiczenia będą wykonywane pod <a href="http://www.ubuntu.com/download/desktop">Ubuntu w wersji 12.04 LTS</a>, jednej z najbardziej popularnych dystrybucji Linux. Istnieją teraz przed tobą dwie możliwości:</p>
+<ol>
+<li>Zainstalowanie Ubuntu na fizycznej maszynie. Pamiętaj tylko, że jeżeli będziesz wykonywał ćwiczenia w pracowni komputerowej, nie będziesz miał możliwości instalacji systemu na komputerze w sali. W tym przypadku, podczas pracy, będziesz musiał wykorzystać swój własny komputer. </li>
+<li>Stworzenie wirtualnej maszyny z Ubuntu. Do tego celu polecam Ci użycie programu <a href="https://www.virtualbox.org/">VirtualBox</a>. Jeżeli, masz kłopot z tym zdanie, zobacz ten <a href="http://www.youtube.com/watch?v=hK-oggHEetc">poradnik wideo</a>, który przeprowadzi Cię, krok po kroku, przez cały proces instalacji. Utworzoną wirtualną maszynę możesz przenosić na urządzeniach pamięci masowej (czytaj pendrive ☺) i wykorzystywać zarówno w domu, jak i w sali komputerowej. </li>
+</ol>
+<p>Jeżeli, instalacja powiodła się, włącz terminal i upewnij się, że możesz zalogować się jako <a href="http://en.wikipedia.org/wiki/Superuser">superuser</a>. W tym celu wykonaj w terminalu następujące polecenie:</p>
+<pre><code>$ sudo su -
+# teraz wpisz swoje hasło</code></pre>
+<p>Jeżeli wszystko się powiodło, powinieneś zobaczyć następujący widok:</p>
+<p><img src="img/terminal.png" alt="W terminalu jako root"></p>
+<p>Jeżeli uzyskałaś podobny efekt, możesz przejść do dalszej części lektury. Na koniec wstępu, krótkie podsumowanie. Aby rozpocząć pracę potrzebujesz:</p>
+<ul>
+<li>skonfigurowaną instalację Ubuntu (zalecana wersja 12.04 LTS);</li>
+<li>dostęp do <code>superusera</code> (możliwość wykonywania komend z <code>sudo</code>);</li>
+<li>podstawowe obeznanie z użytkowaniem komputera poprzez terminal. Jeżeli dalej czujesz się niepewnie w tym * temacie, zapoznaj się z <a href="http://zasoby.open.agh.edu.pl/~09saprzybylo/plik.html">tym poradnikiem</a>;</li>
+<li>odrobinę chęci ☺.</li>
+</ul>
+<p>Podczas pracy z systemem z rodziny Unix nie zapominaj o istnieniu komendy <a href="http://en.wikipedia.org/wiki/Man_page">man</a>, która wyświetla manual danej komendy. Dla przykładu, chce uzyskać informację na temat komendy <code>usermod</code>. Wpisuje w konsoli:</p>
+<pre><code>$ man usermod # aby wyjść z manuala, naciśnij przycisk ‚q’</code></pre>
+<h2 id="permission-control">Kontrola dostępu do zasobów</h2>
+
+<p>Jeżeli w twoim systemie mają zawitać nowi użytkownicy, musisz wiedzieć jak kontrolować dostęp do istniejących w systemie zasobów. Możesz przecież przechowywać na swoim koncie poufne pliki, których zawartość nie może być odczytana, tym bardziej zmieniona, przez niepowołanych użytkowników. Celem tego rozdziału jest przypomnienie podstawowych informacji z tego zakresu. </p>
+<p>W systemach Unix każdy zasób (np. plik lub folder<sup>1</sup>) posiada trzy klasy dostępu: klasa użytkownika <code>user</code>, klasa grupy <code>group</code> oraz klasa dostępu dla reszty użytkowników systemu <code>others</code>. Podczas tworzenia zasobu, właściwości każdej klasy określa maska <a href="http://en.wikipedia.org/wiki/Umask">umask</a> (user mask). Aby sprawdzić aktualnie ustawioną maskę dla nowych zasobów wpisz w konsoli:</p>
+<pre><code>$ umask -S</code></pre>
+<p>Twoim oczom powinien ukazać się podobny komunikat:</p>
+<pre><code>u=rwx,g=rwx,o=rx</code></pre>
+<p>Litery <code>u</code>,  <code>g</code>,  <code>o</code> symbolizują klasy dostępu, a <code>r</code>, <code>w</code>, <code>x</code> to prawa dostępu. Litera <code>r</code> to prawo do odczytu, <code>w</code> to prawo do zapisu, a <code>x</code> to prawo do wykonania pliku. W tym konkretnym przypadku właściciel pliku będzie mógł odczytać, nadpisać oraz wykonać nowo utworzony plik. Takie same prawa dostępu będą mieli członkowie grupy, do której przynależy plik. Reszta użytkowników będzie mogła tylko odczytać i wykonać plik. Wypróbujmy teraz działanie maski. Stwórzmy nowy plik i zobaczmy jakie ma prawa dostępu.</p>
+<pre><code>$ touch test.txt
+# ls -l</code></pre>
+<p>W terminalu wyświetli się lista plików wraz z prawami dostępu. Między innymi pojawi się nasz nowo utworzony plik: </p>
+<pre><code>-rw-rw-r-- 1 mckomo mckomo 0 Jan 25 12:52 test.txt</code></pre>
+<p>Jeżeli dalej nie rozumiesz, co oznacza powyższy zapis, przeczytaj <a href="http://www.scrounge.org/nixaccess.htm">ten tekst</a> lub odwiedź <a href="http://pl.wikipedia.org/wiki/Prawa_dost%C4%99pu">Wikipedię</a>. Powinieneś zauważyć, że plik nie ma ustawionych praw do wykonania. Dzieje się tak, ponieważ polecenie <code>touch</code> domyślnie ich nie ustawia. Aby je dodać musimy wspomóc się komendą <a href="http://pl.wikipedia.org/wiki/Chmod">chmod</a>. </p>
+<pre><code>chmod +x test.txt</code></pre>
+<p>Aby potwierdzić, że prawo do wykonania zostało dodane, jeszcze raz użyjmy komendę <code>ls -l</code>.</p>
+<pre><code>-rwxrwxr-x 1 mckomo mckomo 0 Jan 25 12:52 test.txt</code></pre>
+<p>Jeżeli jesteś zainteresowany zmianą domyślnej umask, <a href="http://linux.byexamples.com/archives/370/umask-create-new-files-with-specified-file-mode/">ten poradnik</a> będzie przydatny. Pamiętaj, że prawa dostępu można również ustawiać manualnie poleceniem <code>chmod</code>. Przypuśćmy, że chcemy ograniczyć dostęp do pliku i zostawić prawa dostępu tylko właścicielowi pliku. </p>
+<pre><code>chmod 700 test.txt</code></pre>
+<p>W powyższym przykładzie ustawiliśmy maskę dostępu <code>700</code><sup>2</sup>. Maska dostępu składa się z 3 cyfr z przedziału od 0 do 7. Pierwsza cyfra określa prawa dostępu dla użytkownika, druga dla grupy, a ostania dla reszty. Znacznie każdej cyfry oraz odpowiadające im prawa dostępu zostały przedstawione w poniższej tabeli.</p>
+<table>
+<thead>
+<tr>
+<th>Octal</th>
+<th>Binary</th>
+<th>Permission</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>000</td>
+<td>no permissions</td>
+</tr>
+<tr>
+<td>1</td>
+<td>001</td>
+<td>execute</td>
+</tr>
+<tr>
+<td>2</td>
+<td>010</td>
+<td>write</td>
+</tr>
+<tr>
+<td>3</td>
+<td>011</td>
+<td>write + execute</td>
+</tr>
+<tr>
+<td>4</td>
+<td>100</td>
+<td>read</td>
+</tr>
+<tr>
+<td>5</td>
+<td>101</td>
+<td>read + execute</td>
+</tr>
+<tr>
+<td>6</td>
+<td>110</td>
+<td>read + write</td>
+</tr>
+<tr>
+<td>7</td>
+<td>111</td>
+<td>read + write + execute</td>
+</tr>
+</tbody>
+</table>
+<p>Zobaczmy teraz efekt ostatniej komendy chmod wykorzystując ponownie <code>ls -l</code>.</p>
+<pre><code> -rwx------ 1 mckomo mckomo 0 Jan 25 12:52 test.txt</code></pre>
+<p>Jak widać, teraz tylko użytkownik ma pełne prawa dostępu do pliku. Członkowie grupy <code>mckomo</code> oraz pozostali użytkownicy systemu nie mają już żadnych uprawnień.</p>
+<p>Dzięki komendzie <a href="http://pl.wikipedia.org/wiki/Chown">chown</a> (change owner) możemy również zmienić właściciela pliku oraz jego grupę. Dla ćwiczenia możemy przypisać pliku <code>test.text</code> do grupy oraz użytkownika <code>root</code>. </p>
+<pre><code>$ sudo chown root:root test.txt # operacja musi być wykonana z poziomu superusera
+$ ls -l
+-rwx------ 1 root root 0 Jan 25 12:52 test.txt # wynik operacji chown</code></pre>
+<p>Spróbujmy teraz dodać tekst <code>Ala ma kota</code> do pliku <code>test.txt</code>.</p>
+<pre><code>$ echo „Ala ma kota” &gt; test.txt</code></pre>
+<p>Ponieważ próbujemy nadpisać plik jako użytkownik (w moim przypadku jest to mckomo), który nie jest właścicielem pliku (jest nim aktualnie root), operacja nie powiedzie się. Wyskoczy błąd o braku dostępu do pliku. Zmieńmy maskę dostępu dla klasy <code>others</code> i dajmy jej pełny dostęp do pliku.</p>
+<pre><code>sudo chmod o=rwx test.txt # klasa others dostaję dostęp do odczytu, zapisu i wykonania pliku</code></pre>
+<p>Aktualnie plik powinien mieć maskę <code>-rwx—rwx</code>. Spróbujmy jeszcze raz dodać tekst do pliku. Teraz operacja powinna zakończyć się powodzeniem.</p>
+<pre><code>$ echo „Ala ma kota” &gt; test.txt # błąd już się nie pojawia
+$ cat test.txt # wyświetl zawartość pliku
+Ala ma kota</code></pre>
+<p>Na koniec, przypiszmy plik ponownie do oryginalnego użytkownika i grupy oraz ustawimy standardowe prawa dostępu <code>644</code> (u=rw, g=r, o=r).</p>
+<pre><code>chown mckomo:mckomo test.txt
+chmod 644 test.txt</code></pre>
+<p>Dzięki zmianie maski dostępu oraz przypisaniu zasobu do właściwego użytkownika oraz grupy można w pełni kontrolować jego dostępność względem innych użytkowników. Jako administrator, który dodaje nowych użytkowników do systemu, powinieneś być w pełni świadomy konsekwencji wykorzystywania komend typu <code>chmod</code> i <code>chown</code>. Jeżeli dalej nie czujesz się pewnie w tym temacie, zatrzymaj się na tym punkcie i w celu poszerzenia wiedzy odwiedź odpowiednie linki z działu <a href="#links">Dla głodnych wiedzy</a>.</p>
+<p><sup>1</sup> Folder w systemie Unix również jest plikiem.</p>
+<p><sup>2</sup> Maska dostępu fizycznie zapisywana jest na 3 bitach. Maska <code>7</code> to inaczej <code>111</code> w zapisie binarnym.</p>
+<h2 id="users">Zarządzanie użytkownikami</h2>
+
+<p>Jeżeli jesteśmy już merytorycznie przygotowani do rozszerzenia swojego systemu o nowych użytkowników, możemy przejść do meritum sprawy. Zacznijmy od zapoznania się z plikiem <a href="http://www.cyberciti.biz/faq/understanding-etcpasswd-file-format/">/etc/passwd</a>, który zawiera listę wszystkich użytkowników.</p>
+<pre><code>$ cat /etc/passwd
+mckomo:x:1000:1000:mckomo:/home/mckomo:/bin/bash # ostatnia linia pliku, czyli dane użytkownika utworzonego podczas instalacji</code></pre>
+<p>Wpisy użytkowników w pliku <code>passwd</code> mają następującą strukturę:</p>
+<p><img src="img/passwd.png" alt="Struktura pliku /etc/passwd"></p>
+<ol>
+<li>Nazwa użytkownika</li>
+<li>Hasło użytkownika. Jeżeli jest równe x, oznacza to, że zaszyfrowane hasło przetrzymywane jest w pliku <a href="http://www.cyberciti.biz/faq/understanding-etcshadow-file/">/etc/shadows</a>.</li>
+<li>Id użytkownika (UID). Liczby z zakresu od 0 do 999 są zarezerwowane przez system. Pamiętaj o tym tworząc  ręcznie nowego użytkownika.</li>
+<li>Id grupy (GID). Liczby z zakresu od 0 do 999 również są zarezerwowane przez system.</li>
+<li>Dodatkowe informację o użytkowniku typu pełna nazwa użytkownika, telefon, lokalizacja itp.</li>
+<li>Katalog domy użytkownika.</li>
+<li>Domyślana powłoka używana przez użytkownika. Przeważnie jest to <code>/bin/bash.</code></li>
+</ol>
+<p>Nazwę swojego użytkownika można również zobaczyć używając prostej komendy <a href="http://pl.wikipedia.org/wiki/Whoami">whoami</a>, która wyświetli nazwę twojego użytkownika. Zapamiętaj ją, ponieważ przyda się nam w dalszej części kursu.</p>
+<pre><code>$ whoami
+mckomo # nazwa użytkownika, podana podczas instalacji systemu</code></pre>
+<h3 id="dodawanie-u-ytkownika">Dodawanie użytkownika</h3>
+<p>Proces dodawania nowego użytkownika jest bardzo prosty. Do tego celu wykorzystujemy komendę <a href="http://linux.about.com/od/commands/l/blcmdl8_adduser.htm">adduser</a>. Ja utworze swojego imiennika, czyli użytkownika o nazwie <code>maciej</code>.</p>
+<pre><code>$ sudo adduser maciej # użytkownika musisz dodać jako superuser
+Adding user `maciej&#39; ...
+Adding new group `maciej&#39; (1002) … # nowy użytkownik dostanie UID równe 1002
+Adding new user `maciej&#39; (1001) with group `maciej&#39; … # dla użytkownika zostanie dodana grupa o tej samej nazwie
+Creating home directory `/home/maciej&#39; … # dla użytkownika jest tworzony jego folder domy
+Copying files from `/etc/skel&#39; … # folder domowy jest wypełniany kopiami plików z folderu /etc/skel
+Enter new UNIX password: # musisz podać hasło dla użytkownika
+Retype new UNIX password: 
+passwd: password updated successfully
+Changing the user information for maciej
+Enter the new value, or press ENTER for the default # możesz również podać dodatkowe dane użytkownika
+    Full Name []: Maciej
+    Room Number []: 
+    Work Phone []: 
+    Home Phone []: 
+    Other []:
+Is the information correct? [Y/n] Y # potwierdź wpisane dane</code></pre>
+<p>Zobaczmy jeszcze raz zawartość pliku <code>/etc/passwd</code>.</p>
+<pre><code>$ tail -2 /etc/passwd # wyświetl 2 ostatnie linie pliku passwd 
+mckomo:x:1000:1000:mckomo:/home/mckomo:/bin/bash
+maciej:x:1001:1002:Maciej,,,:/home/maciej:/bin/bash</code></pre>
+<p>Wygląda na to, że użytkownik został dodany pomyślnie. Zmienimy teraz użytkownika na nowo utworzonego usera, używając polecenia <a href="http://en.wikipedia.org/wiki/Su_(Unix">su</a>) (switch user).</p>
+<pre><code>$ su - maciej # flaga ‚-’ sprawi, że przeniesiemy się od razu do folderu domowego użytkownika
+$ whoami # sprawdźmy, czy faktycznie użytkownik zmienił się
+maciej
+$ pwd # sprawdźmy jeszcze, w jakim katalogu się znajdujemy
+/home/maciej
+$ exit # wyloguj się do podstawowego konta
+$ whoami # w moim przypadku będzie to mckomo 
+mckomo</code></pre>
+<p>Wszystkim nowym użytkownikom, zalecam od razu zmienić hasło dostępu do swojego konta. Za nim jednak to uczynimy, zobaczmy jeszcze zawartość pliku <code>/etc/shadow</code>, gdzie zapisane jest zaszyfrowane hasło dostępu do twojego konta. W tym celu wpiszmy polecenie:</p>
+<pre><code>$ sudo tail -1 /etc/shadow # upewni się, że wykonałeś komendę exit po zalogowaniu na profil na nowego użytkownika
+
+maciej:$6$hXey1/1D$fdvsH5nus9ipaWO0Jf4GkC58dTtIrmPqRcM.Ju3fOSJOFyVloIimc8NJ3SCgZhGHYcEJkxqlzQGOIRSidKQkr1:16096:0:99999:7::: # ten długi niezrozumiały ciąg znaków to własnie twoje zaszyfrowane hasło</code></pre>
+<p>Możemy teraz jeszcze raz zmienić użytkownika i spróbować zmienić hasło komendą <a href="">passwd</a>.</p>
+<pre><code>$ su - maciej
+$ passwd
+(current) UNIX password: # musimy wpisać hasło, które podaliśmy podczas tworzenia nowego użytkownika
+Enter new UNIX password: # oraz wpisać nowe
+Retype new UNIX password: 
+passwd: password updated successfully
+$ exit # wyloguj się</code></pre>
+<p>Zobaczmy jeszcze raz zawartość pliku <code>shadow</code>.</p>
+<pre><code>$ sudo tail -1 /etc/shadow
+maciej:$6$vb7qBVUy$hG5vg8aNJYjeMk.zTVg8G5PN1Qt1Du6hBmt0IeCu7QyRM.8lobGUvMFaAyIBsxZgN53swOMDOjhvxrVPgoaf4/:16096:0:99999:7:::</code></pre>
+<p>Jak widać polecenie passwd zmieniło zawartość pliku shadow. </p>
+<p>W wolnej chwili, możesz również zapoznać się z działaniem komendy <a href="http://manpages.ubuntu.com/manpages/dapper/pl/man8/useradd.8.htmla">useradd</a>, które również daje możliwość dodania użytkownika. Jej użycie jest bardziej skomplikowane, lecz daje znacznie większe możliwości.</p>
+<h3 id="edycja-u-ytkownika">Edycja użytkownika</h3>
+<p>Jeżeli z jakiś powodów chcemy zmienić nazwę nowo utworzonego użytkownika, możemy użyć komendy <a href="http://pl.wikipedia.org/wiki/Usermod">usermod</a>.</p>
+<pre><code>$ sudo usermod -l maciek maciej # zmieniam nazwę użytkownika z maciej na maciek</code></pre>
+<p>Szybkie sprawdzenie zawartości <code>/etc/passwd</code> potwierdzi, że osiągnęliśmy zamierzony efekt.</p>
+<pre><code>$ tail -l /etc/passwd
+maciek:x:1001:1002:Maciej,,,:/home/maciej:/bin/bash # zauważ, że katalog domowy nie został zmieniony</code></pre>
+<p>W ramach praktyki przywróć poprzednią nazwę użytkownika.</p>
+<p>Ręczna zmiana nazwy użytkownika poprzez edycję pliku <code>/etc/passwd</code> skończy się totalną katastrofą. Mimo że, system rozpozna nową nazwę użytkownika, nie pozwoli Ci się ponowne zalogowanie. Dzieje się tak dlatego, że twoje hasło w pliku <code>/etc/shadow</code> dalej jest przypisane do starej nazwy użytkownika (czyli w moim przypadku maciej zamiast maciek).</p>
+<p>Używając polecenia <code>usermod</code> możesz dokonać wiele zmian. Wszystkie możliwości tej komendy zostały dokładnie opisane w tym <a href="http://www.computerhope.com/unix/usermod.htm">doskonałym poradniku</a>.</p>
+<h3 id="usuwanie-u-ytkownika">Usuwanie użytkownika</h3>
+<p>Kiedy zajdzie taka potrzeba, powinieneś być również przygotowany na uśniecie użytkownika. Wykorzystując wcześniej zdobyte informację, stwórz użytkownika o nazwie <code>huligan</code>. Czy twój plik <code>/etc/passwd</code> wygląda podobnie?</p>
+<pre><code>huligan:x:1003:1004:,,,:/home/huligan:/bin/bash</code></pre>
+<p>Ponieważ użytkownik <code>huligan</code> nie użytkuje zasobów systemu zgodnie z przyjętym regulaminem, podejmujesz decyzję o usunięciu użytkownika. Pomocna okaże się komenda <a href="http://manpages.ubuntu.com/manpages/precise/en/man8/userdel.8.html">userdel</a>. </p>
+<pre><code>userdel -r huligan # użycie flagi -r sprawi, że zostanie usunięty również katalog domy użytkownika
+
+# powinieneś również zapoznać się z innymi flagami komendy userdel
+
+userdel -f # flaga -f (od force) umożliwi usunięcie użytkownik, który aktualnie jest zalogowany
+userdel -p # flaga -p sprawi, że wpis o użytkowniku w pliku /etc/passwd nie zostanie usunięty, jednakże użytkownik nie będzie mógł już się zalogować do systemu
+userdel -fpr # pamiętaj, że falgi można łączyć</code></pre>
+<p>Wyświetlając jeszcze raz zawartość <code>/etc/passwd</code> zobaczymy, że wpis użytkownika huligan został usunięty. Sprawdź jeszcze listę folderów w katalogu <code>/home</code>, aby upewnić się, że katalog domowy użytkownika huligan również został usunięty. </p>
+<h3 id="zalogowani-u-ytkownicy">Zalogowani użytkownicy</h3>
+<p>Jeżeli planujesz udostępniać swój system w sieci (np. poprzez <a href="http://pl.wikipedia.org/wiki/Secure_Shell">SSH</a>), warto żebyś poznał komendę <a href="http://pl.wikipedia.org/wiki/Users">users</a>, który pokaże Ci wszystkich aktualnie zalogowanych użytkowników.</p>
+<pre><code>$ users
+mckomo # zalogowany jest tylko użytkownik podstawowy
+$ sudo login maciej # zaloguj się (nie jest to równoważne zmienię użytkownika, jak w przypadku komendy su), na utworzonego wcześniej użytkownika
+$ users
+mckomo maciej # jak widać mamy już 2 użytkowników 
+$ logout # możemy się już wylogować</code></pre>
+<h2 id="groups">Zarządzanie grupami</h2>
+
+<p>Kiedy już wiesz, jak zarządzać użytkownikami, przyswojenie umiejętności zarządzanie grupami powinno pójść dużo łątwiej. Sam zobaczysz, że są to procesy bardzo podobne.</p>
+<p>Spróbujmy dowiedzieć się do jakich grup należy nasz nowo utworzony użytkownik. Wykorzystamy polecenie <a href="">groups</a></p>
+<pre><code>$ su - maciej # zmiana użytkownika
+$ groups 
+maciej # jak widać, nasz użytkownik przynależy tylko do jednej grupy
+$ groups nazwa_uzytkownika # możemy też sprawdzić grupy innego użytkownika</code></pre>
+<p>Zanim przejdziemy dalej, poświęćmy chwilę pliku <a href="http://www.cyberciti.biz/faq/understanding-etcgroup-file/">/etc/group</a>, który, jak pewnie się domyślasz, zawiera informację o istniejących w systemie grupach. </p>
+<pre><code>$ tail -2 /etc/group # wyświetl 2 ostanie linie pliku group
+mckomo:x:1000:
+maciej:x:1002:</code></pre>
+<p>Plik ten posiada bardzo prosta strukturę:</p>
+<ol>
+<li>Nazwa grupy. Zauważ, że jest ona taka sama, jak nazwa użytkownika.</li>
+<li>Hasło grupy. Przeważnie nie jest używane.</li>
+<li>Id grupy (GID).</li>
+<li>Lista użytkowników zapisanych do grupy.</li>
+</ol>
+<h3 id="dodawanie-grupy">Dodawanie grupy</h3>
+<p>Czas na dodanie nowej grupy. Używając polecenia <a href="http://manpages.ubuntu.com/manpages/precise/en/man8/groupadd.8.html">groupadd</a> dodamy grupę student.</p>
+<pre><code>$ groupadd student
+$ tail -3 /etc/group # wyświetl 3 ostanie linie pliku group
+mckomo:x:1000:
+maciej:x:1002:
+student:x:1003: # grupa został utworzona i otrzymała GID 1003</code></pre>
+<p>Mamy już grupę. Możemy teraz dodać do niej wcześniej dodanego użytkownika. Użyjemy znanej Ci już metody <code>usermod</code>.</p>
+<pre><code>$ usermod -aG student maciej # dodajmy użytkownika maciej do grupy student 
+$ tail -1 /etc/group # sprawdźmy, czy coś się zmieniło w pliku group
+student:x:1003:maciej # użytkownik został dodany do listy członków grupy student
+$ groups maciej # sprawdzmy jeszcze co nam zwróci polecenie groups
+maciej : maciej student # operacja zakończona pełnym powodzeniem</code></pre>
+<p>Teraz, kiedy wiemy jak dodawać grupy, możemy to praktycznie wykorzystać. Przypuśćmy, że chcemy udostępnić plik <code>notatki.txt</code> wszystkim studentom, ale nikomu więcej. Przydatne będzie polecenie <a href="http://pl.wikipedia.org/wiki/Chgrp">chgrp</a> (change group), które zmieni grupę pliku.</p>
+<pre><code>$ touch notatki.txt # tworzymy plik z notatkami
+$ ls -l notatki.txt # sprawdźmy aktualne prawa dostępu tego pliku
+-rw-rw-r-- 1 mckomo mckomo 0 Jan 26 21:37 notatki.txt
+$ sudo chgrp student notatki.txt # operacja musi być wykonana jako superuser
+$ chown 740 notatki.txt # ustawiamy prawa odczytu dla klasy dostępu group 
+$ ls -l notatki.txt # sprawdźmy jeszcze raz właściwości pliku
+-rwxrw---- 1 mckomo student 0 Jan 26 21:37 notatki.txt # plik ma zmienioną grupę oraz prawa dostępu</code></pre>
+<p>Teraz plik z notatkami będzie dostępny do odczytu dla wszystkich członków grupy student. Jeżeli chcemy wypisać użytkownika z danej grupy, użyjemy nowej komendy <a href="http://manpages.ubuntu.com/manpages/precise/pl/man8/deluser.8.html">deluser</a>.</p>
+<pre><code>$ sudo deluser maciej student
+Removing user `maciej&#39; from group `student&#39; ...
+Done.
+$ groups maciej
+maciej : maciej # maciej nie należy już do grupy student</code></pre>
+<p>W ramach ćwiczenia, dodaj ponownie nowego użytkownika do grupy student.</p>
+<h3 id="edycja-grup">Edycja grup</h3>
+<p>Do edycji grupy wykorzystaj polecenie <a href="http://manpages.ubuntu.com/manpages/precise/pl/man8/groupmod.8.html">groupmod</a> (czy widzisz już analogie względem komend dla użytkownika?). Ponieważ wszyscy użytkownicy z grupy student, zakończyli już pomyślnie studia i stali się absolwentami (ang. graduate), wypadało by zmienić nazwę grupy na bardziej adekwatną.</p>
+<pre><code>$ sudo groupmod -n graduate student # flaga -n sprawi, że nazwa grupy zostanie zmieniona
+$ groups maciej # zobaczmy jeszcze szybko grupy nowego użytkownika
+maciej : maciej graduate # zmiana nazwy powiodła się</code></pre>
+<h3 id="usuwanie-grupy">Usuwanie grupy</h3>
+<p>Zostało nam jeszcze usuwanie grup. Czy domyślasz się, jak może nazywać się odpowiednia do tego komenda? Tak, masz rację. Służy do tego <a href="http://manpages.ubuntu.com/manpages/precise/en/man8/groupdel.8.html">groupdel</a>. Aby posprzątać po naszych ćwiczeniach, usuniemy niedawno utworzoną grupę graduate.</p>
+<pre><code>$ sudo groupdel graduate
+$ tail -2 /etc/group # zobaczysz, że wpis grupy graduate został usunięty
+mckomo:x:1000:
+maciej:x:1002:
+$ groups maciej # maciej automatycznie zostanie wypisany z usuniętej grupy
+maciej : maciej 
+$ ls -l notatki.txt # zobaczmy jeszcze co się stało z plikiem, który należał do tej grupy
+-rwxr----- 1 mckomo 1003 8 Jan 26 21:43 notatki.txt</code></pre>
+<p>Plik notatki.txt nie jest już przypisany do żadnej grupy, ponieważ grupa o <code>GID</code> 1003 nie istnieje. Jeżeli dodamy nową grupę z tym właśnie <code>GID</code>, plik automatycznie zostanie dodany do nowo utworzonej grupy.</p>
+<h2 id="summary">Podsumowanie</h2>
+
+
+<p>A więc to już koniec. Mam nadzieję, ze tekst był dla Ciebie ciekawy oraz czegoś się z niego się nauczyłeś. Kończąc lekturę powinieneś przede wszystkim zapamiętać komendy, które są niezbędne do zarządzania użytkownikami oraz grupami. Pozwól, że wymienię je jeszcze raz:</p>
+<ul>
+<li><code>adduser</code> i <code>useradd</code> - komendy służąca do dodawania nowych użytkowników</li>
+<li><code>usermod</code> - pozwoli Ci na modyfikowanie danych użytkownika</li>
+<li><code>userdel</code> - usunie niepożądanego użytkownika</li>
+<li><code>groupadd</code>, <code>groupmod</code>, <code>groupdel</code> - analogiczny zestaw komend dla grup</li>
+</ul>
+<p>Pewnie teraz myślisz, że wiesz już wszystko. Niestety jesteś w ogromnym błędzie. Systemy typu Unix będą miały przed tobą jeszcze wiele zagadek. Ten tekst nie proszą wszystkich zagadnień, które powinieneś znać, jako pełnoprawny administrator systemu. Polecam Ci zapoznać się z linkami z działu <a href="#links">Dla głodnych wiedzy</a>, będzie to doskonała kontynuacja twojej edukacji systemów Unix.</p>
+<h3 id="links">Dla głodnych wiedzy</h3>
+
+<ul>
+<li><a href="http://zasoby.open.agh.edu.pl/~09saprzybylo/index.html"><a href="http://zasoby.open.agh.edu.pl/~09saprzybylo/index.html">http://zasoby.open.agh.edu.pl/~09saprzybylo/index.html</a></a> - Strona na temat systemów Unix. Zawiera wiele praktycznych porad dotyczących obsługi systemu oraz pisania skryptów systemowych.</li>
+<li><a href="http://www.tutorialspoint.com/unix/unix-file-permission.htm"><a href="http://www.tutorialspoint.com/unix/unix-file-permission.htm">http://www.tutorialspoint.com/unix/unix-file-permission.htm</a></a> - jeżeli dalej nie rozumiesz, jak działaja prawa dostępu w systemach Unix, ta strona jest dla Ciebie</li>
+<li><a href="http://www.perlfect.com/articles/chmod.shtml"><a href="http://www.perlfect.com/articles/chmod.shtml">http://www.perlfect.com/articles/chmod.shtml</a></a> - komenda <code>chmod</code> pod lupą</li>
+<li><a href="https://help.ubuntu.com/12.04/serverguide/user-management.html"><a href="https://help.ubuntu.com/12.04/serverguide/user-management.html">https://help.ubuntu.com/12.04/serverguide/user-management.html</a></a> - oficjalny poradnik twórców Ubuntu o zarządzaniu użytkownikami</li>
+<li><a href="http://www.cyberciti.biz/"><a href="http://www.cyberciti.biz/">http://www.cyberciti.biz/</a></a> - skarbnica wiedzy dla użytkowników Unix-a</li>
+<li><a href="http://www.imss.caltech.edu/node/324"><a href="http://www.imss.caltech.edu/node/324">http://www.imss.caltech.edu/node/324</a></a> - zbiór poradników o systemach Unix</li>
+<li><a href="https://www2.opengroup.org/ogsys/jsp/publications/PublicationDetails.jsp?publicationid=12570"><a href="https://www2.opengroup.org/ogsys/jsp/publications/PublicationDetails.jsp?publicationid=12570">https://www2.opengroup.org/ogsys/jsp/publications/PublicationDetails.jsp?publicationid=12570</a></a> - tylko do odważnych: specyfikacja systemów klasy Unix</li>
+</ul>
+<h3 id="be-social-">Be social!</h3>
+<p>Treść tego tekstu jest dostępna na <a href="">Githubie</a>. Jeżeli zauważyłeś jakiś błąd lub chcesz coś dodać, nie wahaj się wnieść własnego wkładu w ten tekst. Przyszli czytelnicy będą Ci wdzięczni :)</p>
+<hr>
+<p>Autor tekstu: Maciej Komorowski</p>
+
+</body>
+</html>
