@@ -34,4 +34,5 @@ Polecenie `grunt` przekompiluje plik `assets/md/script.md` do formatu html i umi
 
 ## Kontrybutorzy
 
-* Maciej Komorowski
+* [mckomo](https://github.com/mckomo)
+* [wiped1](https://github.com/wiped1)
