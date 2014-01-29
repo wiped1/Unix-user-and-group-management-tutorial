@@ -13,14 +13,14 @@
 
 Celem lektury tego poradnika jest przysposobienie umiejętności niezbędnej dla każdego użytkownika systemu operacyjnego typu Unix. Poprzez lekturę oraz wykonanie zestawu praktycznych ćwiczeń, chciałbym Cię, drogi czytelniku, zapoznać z  podstawami administracji użytkownikami oraz grupami w systemach Unix. 
 
-Zanim jednak rozpoczniesz pracę z tym dokumentem, zapoznaj się z rozdziałem [Zanim zaczniesz](#requirements), w którym dowiesz się, co zrobić przed rozpoczęciem ćwiczeń oraz rozdziałem [Kontrola dostępu](#permission-control), który odświeży twoje wiadomości z zakresu kontroli dostępu do zasobów systemu. Tekst zawieram wiele odnośników do sprawdzonych internetowych źródeł – nie wahaj się ich użyć, mogą one znacznie poszerzyć zakres twojej wiedzy. Nie zapomnij również zaglądnąć do działu [Dla głodnych wiedzy](#links),  gdzie umieściłem link do stron, które warto odwiedzić. Tymczasem zapraszam do lektury!
+Zanim jednak rozpoczniesz pracę z tym dokumentem, zapoznaj się z rozdziałem [Zanim zaczniesz](#requirements), w którym dowiesz się, co zrobić przed rozpoczęciem ćwiczeń oraz rozdziałem [Kontrola dostępu](#permission-control), który odświeży twoje wiadomości z zakresu kontroli dostępu do zasobów systemu. Tekst zawiera wiele odnośników do sprawdzonych internetowych źródeł – nie wahaj się ich użyć, mogą one znacznie poszerzyć zakres twojej wiedzy. Nie zapomnij również zaglądnąć do działu [Dla głodnych wiedzy](#links),  gdzie umieściłem linki do stron, które warto odwiedzić. Tymczasem zapraszam do lektury!
 
 <h2 id="requirements">Zanim zaczniesz</h2>
 
 Zanim zaczniemy, musimy przygotować nasze stanowisko pracy. Pierwszym krokiem będzie instalacja systemu operacyjnego. Wszystkie praktycznie ćwiczenia będą wykonywane pod [Ubuntu w wersji 12.04 LTS](http://www.ubuntu.com/download/desktop), jednej z najbardziej popularnych dystrybucji Linux. Istnieją teraz przed tobą dwie możliwości:
 
 1. Zainstalowanie Ubuntu na fizycznej maszynie. Pamiętaj tylko, że jeżeli będziesz wykonywał ćwiczenia w pracowni komputerowej, nie będziesz miał możliwości instalacji systemu na komputerze w sali. W tym przypadku, podczas pracy, będziesz musiał wykorzystać swój własny komputer. 
-2. Stworzenie wirtualnej maszyny z Ubuntu. Do tego celu polecam Ci użycie programu [VirtualBox](https://www.virtualbox.org/). Jeżeli, masz kłopot z tym zdanie, zobacz ten [poradnik wideo](http://www.youtube.com/watch?v=hK-oggHEetc), który przeprowadzi Cię, krok po kroku, przez cały proces instalacji. Utworzoną wirtualną maszynę możesz przenosić na urządzeniach pamięci masowej (czytaj pendrive ☺) i wykorzystywać zarówno w domu, jak i w sali komputerowej. 
+2. Stworzenie wirtualnej maszyny z Ubuntu. Do tego celu polecam Ci użycie programu [VirtualBox](https://www.virtualbox.org/). Jeżeli, masz kłopot z tym zadaniem, zobacz ten [poradnik wideo](http://www.youtube.com/watch?v=hK-oggHEetc), który przeprowadzi Cię, krok po kroku, przez cały proces instalacji. Utworzoną wirtualną maszynę możesz przenosić na urządzeniach pamięci masowej (czytaj pendrive ☺) i wykorzystywać zarówno w domu, jak i w sali komputerowej. 
 
 
 Jeżeli, instalacja powiodła się, włącz terminal i upewnij się, że możesz zalogować się jako [superuser](http://en.wikipedia.org/wiki/Superuser). W tym celu wykonaj w terminalu następujące polecenie:
@@ -41,7 +41,7 @@ Jeżeli uzyskałaś podobny efekt, możesz przejść do dalszej części lektury
 * podstawowe obeznanie z użytkowaniem komputera poprzez terminal. Jeżeli dalej czujesz się niepewnie w tym * temacie, zapoznaj się z [tym poradnikiem](http://zasoby.open.agh.edu.pl/~09saprzybylo/plik.html);
 * odrobinę chęci ☺.
 
-Podczas pracy z systemem z rodziny Unix nie zapominaj o istnieniu komendy [man](http://en.wikipedia.org/wiki/Man_page), która wyświetla manual danej komendy. Dla przykładu, chce uzyskać informację na temat komendy `usermod`. Wpisuje w konsoli:
+Podczas pracy z systemem z rodziny Unix nie zapominaj o istnieniu komendy [man](http://en.wikipedia.org/wiki/Man_page), która wyświetla manual danej komendy. Dla przykładu, chcę uzyskać informację na temat komendy `usermod`. Wpisuję w konsoli:
 
 ```
 $ man usermod # aby wyjść z manuala, naciśnij przycisk ‚q’
@@ -116,7 +116,7 @@ Zobaczmy teraz efekt ostatniej komendy chmod wykorzystując ponownie `ls -l`.
 
 Jak widać, teraz tylko użytkownik ma pełne prawa dostępu do pliku. Członkowie grupy `mckomo` oraz pozostali użytkownicy systemu nie mają już żadnych uprawnień.
 
-Dzięki komendzie [chown](http://pl.wikipedia.org/wiki/Chown) (change owner) możemy również zmienić właściciela pliku oraz jego grupę. Dla ćwiczenia możemy przypisać pliku `test.text` do grupy oraz użytkownika `root`. 
+Dzięki komendzie [chown](http://pl.wikipedia.org/wiki/Chown) (change owner) możemy również zmienić właściciela pliku oraz jego grupę. Dla ćwiczenia możemy przypisać plik `test.text` do grupy oraz użytkownika `root`. 
 
 ```
 $ sudo chown root:root test.txt # operacja musi być wykonana z poziomu superusera
@@ -187,7 +187,7 @@ mckomo # nazwa użytkownika, podana podczas instalacji systemu
 
 ### Dodawanie użytkownika
 
-Proces dodawania nowego użytkownika jest bardzo prosty. Do tego celu wykorzystujemy komendę [adduser](http://linux.about.com/od/commands/l/blcmdl8_adduser.htm). Ja utworze swojego imiennika, czyli użytkownika o nazwie `maciej`.
+Proces dodawania nowego użytkownika jest bardzo prosty. Do tego celu wykorzystujemy komendę [adduser](http://linux.about.com/od/commands/l/blcmdl8_adduser.htm). Ja utworzę swojego imiennika, czyli użytkownika o nazwie `maciej`.
 
 ```
 $ sudo adduser maciej # użytkownika musisz dodać jako superuser
@@ -284,7 +284,7 @@ Używając polecenia `usermod` możesz dokonać wiele zmian. Wszystkie możliwo�
 
 ### Usuwanie użytkownika
 
-Kiedy zajdzie taka potrzeba, powinieneś być również przygotowany na uśniecie użytkownika. Wykorzystując wcześniej zdobyte informację, stwórz użytkownika o nazwie `huligan`. Czy twój plik `/etc/passwd` wygląda podobnie?
+Kiedy zajdzie taka potrzeba, powinieneś być również przygotowany na usunięcie użytkownika. Wykorzystując wcześniej zdobyte informację, stwórz użytkownika o nazwie `huligan`. Czy twój plik `/etc/passwd` wygląda podobnie?
 
 ```
 huligan:x:1003:1004:,,,:/home/huligan:/bin/bash
@@ -306,12 +306,12 @@ Wyświetlając jeszcze raz zawartość `/etc/passwd` zobaczymy, że wpis użytko
 
 ### Zalogowani użytkownicy
 
-Jeżeli planujesz udostępniać swój system w sieci (np. poprzez [SSH](http://pl.wikipedia.org/wiki/Secure_Shell)), warto żebyś poznał komendę [users](http://pl.wikipedia.org/wiki/Users), który pokaże Ci wszystkich aktualnie zalogowanych użytkowników.
+Jeżeli planujesz udostępniać swój system w sieci (np. poprzez [SSH](http://pl.wikipedia.org/wiki/Secure_Shell)), warto żebyś poznał komendę [users](http://pl.wikipedia.org/wiki/Users), która pokaże Ci wszystkich aktualnie zalogowanych użytkowników.
 
 ```
 $ users
 mckomo # zalogowany jest tylko użytkownik podstawowy
-$ sudo login maciej # zaloguj się (nie jest to równoważne zmienię użytkownika, jak w przypadku komendy su), na utworzonego wcześniej użytkownika
+$ sudo login maciej # zaloguj się (nie jest to równoważne zmianie użytkownika, jak w przypadku komendy su), na utworzonego wcześniej użytkownika
 $ users
 mckomo maciej # jak widać mamy już 2 użytkowników 
 $ logout # możemy się już wylogować
@@ -319,7 +319,7 @@ $ logout # możemy się już wylogować
 
 <h2 id="groups">Zarządzanie grupami</h2>
 
-Kiedy już wiesz, jak zarządzać użytkownikami, przyswojenie umiejętności zarządzanie grupami powinno pójść dużo łątwiej. Sam zobaczysz, że są to procesy bardzo podobne.
+Kiedy już wiesz, jak zarządzać użytkownikami, przyswojenie umiejętności zarządzania grupami powinno pójść dużo łatwiej. Sam zobaczysz, że są to procesy bardzo podobne.
 
 Spróbujmy dowiedzieć się do jakich grup należy nasz nowo utworzony użytkownik. Wykorzystamy polecenie [groups]()
 
@@ -330,7 +330,7 @@ maciej # jak widać, nasz użytkownik przynależy tylko do jednej grupy
 $ groups nazwa_uzytkownika # możemy też sprawdzić grupy innego użytkownika
 ```
 
-Zanim przejdziemy dalej, poświęćmy chwilę pliku [/etc/group](http://www.cyberciti.biz/faq/understanding-etcgroup-file/), który, jak pewnie się domyślasz, zawiera informację o istniejących w systemie grupach. 
+Zanim przejdziemy dalej, poświęćmy chwilę na omówienie pliku [/etc/group](http://www.cyberciti.biz/faq/understanding-etcgroup-file/), który, jak pewnie się domyślasz, zawiera informację o istniejących w systemie grupach. 
 
 ```
 $ tail -2 /etc/group # wyświetl 2 ostanie linie pliku group
@@ -367,7 +367,7 @@ $ groups maciej # sprawdzmy jeszcze co nam zwróci polecenie groups
 maciej : maciej student # operacja zakończona pełnym powodzeniem
 ```
 
-Teraz, kiedy wiemy jak dodawać grupy, możemy to praktycznie wykorzystać. Przypuśćmy, że chcemy udostępnić plik `notatki.txt` wszystkim studentom, ale nikomu więcej. Przydatne będzie polecenie [chgrp](http://pl.wikipedia.org/wiki/Chgrp) (change group), które zmieni grupę pliku.
+Teraz, kiedy wiemy jak dodawać grupy, możemy to wykorzystać w praktyce. Przypuśćmy, że chcemy udostępnić plik `notatki.txt` wszystkim studentom, ale nikomu więcej. Przydatne będzie polecenie [chgrp](http://pl.wikipedia.org/wiki/Chgrp) (change group), które zmieni grupę pliku.
 
 ```
 $ touch notatki.txt # tworzymy plik z notatkami
@@ -428,7 +428,7 @@ A więc to już koniec. Mam nadzieję, ze tekst był dla Ciebie ciekawy oraz cze
 * `userdel` - usunie niepożądanego użytkownika
 * `groupadd`, `groupmod`, `groupdel` - analogiczny zestaw komend dla grup
 
-Pewnie teraz myślisz, że wiesz już wszystko. Niestety jesteś w ogromnym błędzie. Systemy typu Unix będą miały przed tobą jeszcze wiele zagadek. Ten tekst nie proszą wszystkich zagadnień, które powinieneś znać, jako pełnoprawny administrator systemu. Polecam Ci zapoznać się z linkami z działu [Dla głodnych wiedzy](#links), będzie to doskonała kontynuacja twojej edukacji systemów Unix.
+Pewnie teraz myślisz, że wiesz już wszystko. Niestety jesteś w ogromnym błędzie. Systemy typu Unix będą miały przed tobą jeszcze wiele zagadek. Ten tekst nie porusza wszystkich zagadnień, które powinieneś znać, jako pełnoprawny administrator systemu. Polecam Ci zapoznać się z linkami z działu [Dla głodnych wiedzy](#links), będzie to doskonała kontynuacja twojej edukacji systemów Unix.
 
 <h3 id="links">Dla głodnych wiedzy</h3>
 
